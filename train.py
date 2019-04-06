@@ -7,7 +7,7 @@ from sklearn.naive_bayes import MultinomialNB, GaussianNB, BernoulliNB
 from sklearn.svm import SVC, NuSVC, LinearSVC
 from sklearn.metrics import confusion_matrix
 
-
+BLACKLISTED = ['the','be','and','of','a','in','to','it','or','an','its','that','is','for','was','on']
 
 def make_Dictionary():
     all_words = []
@@ -18,7 +18,10 @@ def make_Dictionary():
             f = open(pizza+i)
             fc = f.read()
             f.close()
-            all_words = all_words + fc.split()
+            words = fc.split();
+            for word in words:
+                if word not in BLACKLISTED:
+                    all_words.append(word)
 
     dictionary = Counter(all_words)
     # removal of nonwords
@@ -83,7 +86,6 @@ def GetWebsiteFromUrl(url):
 
 train_dir = 'train-data'
 dictionary = make_Dictionary()
-
 train_labels = np.zeros(326)
 train_labels[198:325] = 1
 train_matrix = extract_features()
@@ -113,12 +115,20 @@ def main():
 	print("Neural Networks trained ready for input!\n")
 	submit = ' ';
 	while(submit!='quit'):
-		submit = raw_input("Enter url of website to check if it is fake news or type quit to quit: ")
+		submit = raw_input("Enter url of website to check if it is fake/bias news or type quit to quit: ")
 		print("Multinomial Naive Bayes result for webpage:")
 		try:
-			print(model1.predict(GetWebsiteFromUrl(submit)))
+			m1 = model1.predict(GetWebsiteFromUrl(submit))
+			if(m1==[0.]):
+				print("Fake/Biased")
+			else:
+				print("Real/Unbiased")
 			print("Linear Suport Vector Classifier result for webpage:")
-			print(model2.predict(GetWebsiteFromUrl(submit)))
+			m2 = model2.predict(GetWebsiteFromUrl(submit))
+			if(m2==[0.]):
+				print("Fake/Biased")
+			else:
+				print("Real/Unbiased")
 			print("---------------------------------------------------")
 		except e:
                 	print(e)
